@@ -25,7 +25,7 @@ def functions(p,choice):
             t = df['temp_f'][i]
             F += y-p
             G += t*(y-p)
-            return F,G
+            return np.array([F,G])
     else:
         raise ValueError("Invalid choice. Must be 2 or 3.")
 
@@ -83,7 +83,7 @@ def initial_point(choice):
         return np.array([0,0])
     
 
-def newton_raphson_2d(function, jacobian, initialpoint,tol,max_iter):
+def newton_raphson_2d(function, jacobian, initialpoint,tol=1e-8,max_iter=100):
     
     i = initial_point(2)
     a = i[0]
@@ -92,6 +92,16 @@ def newton_raphson_2d(function, jacobian, initialpoint,tol,max_iter):
     for i in range(23):
         t = df['temp_f'][i]
         p[i] = 1/(1+np.exp(-(a+b*t)))
+    
+    while iterations < max_iter:
+            
+            delta = np.linalg.solve(jacobian(point,2), -functions(point,2))
+            point = point + delta
+            iterations += 1
+            max_abs_value = np.max(np.abs(functions(point,2)))
+            if(max_abs_value < tol):
+                break
+            print(f"Iteration {iterations}\npoint = {point}\nmax_abs_value = {max_abs_value}\n")
 
 
 def newton_raphson(function, jacobian, initialPoint, tol=1e-8, max_iter=100):
@@ -105,7 +115,7 @@ def newton_raphson(function, jacobian, initialPoint, tol=1e-8, max_iter=100):
     max_abs_value = np.max(np.abs(functions(point,3)))
     while iterations < max_iter:
         
-        delta = np.linalg.solve(jacobian(point), -functions(point,3))
+        delta = np.linalg.solve(jacobian(point,3), -functions(point,3))
         point = point + delta
         iterations += 1
         max_abs_value = np.max(np.abs(functions(point,3)))
