@@ -1,14 +1,12 @@
 import numpy as np
-import matplotlib as plt
+import matplotlib.pyplot as plt
 import math
 
-def functions(initialPoint):
-    xk = initialPoint[0]
-    yk = initialPoint[1]
-    zk = initialPoint[2]
+def functions(p):
+    xk, yk, zk = p
     F = 3*xk - math.cos(yk*zk)-0.5
     G = xk**2 -(81*(yk+0.1)**2)+math.sin(zk)+1.06
-    H = math.e **-xk*yk+ 20*zk + (10*math.pi -3)/(3)
+    H = math.exp(-xk*yk)+ 20*zk + (10*math.pi -3)/(3)
 
     F = np.array(
             [F,G,H])
@@ -16,21 +14,19 @@ def functions(initialPoint):
 
     return F
 
-def jacobians(initialPoint):
-    xk = initialPoint[0]
-    yk = initialPoint[1]
-    zk = initialPoint[2]
+def jacobians(p):
+    xk, yk, zk = p
 
     gx = 2 * xk
     gy = -162 * yk - 16.2
     gz = math.cos(zk)
 
     fx = 3
-    fy = 9 + zk * math.sin(yk* zk)
+    fy = zk * math.sin(yk* zk)
     fz = yk * math.sin(yk*zk)
 
-    hx = -yk * math.e**(xk*yk)
-    hy = -xk * math.e**-(xk*yk)
+    hx = -yk * math.exp(-xk*yk)
+    hy = -xk * math.exp(-xk*yk)
     hz = 20
 
     J = np.array([
@@ -53,22 +49,20 @@ def newton_raphson(function, jacobian, initialPoint, tol=1e-8, max_iter=100):
     yk = I[1]
     zk = I[2]
     iterations = 0
-    while iterations <= max_iter:
+    point = np.array([xk, yk, zk], dtype=float)
+    iterations = 0
+    max_abs_value = np.max(np.abs(functions(point)))
+    while iterations < max_iter:
+        
+        delta = np.linalg.solve(jacobian(point), -functions(point))
+        point = point + delta
         iterations += 1
-        J = jacobians(np.array([xk, yk, zk]))
-        F = functions(np.array([xk, yk, zk]))
-
-        point = np.linalg.solve(J, -F)
-
-        if(point[0] < tol and point[1] < tol and point[2]< tol):
-            max_abs_value = float(functions(point))
-            return point, iterations, max_abs_value
-        else:
-            xk = point[0]
-            yk = point[1]
-            zk = point[2]
-            print("iteration "+ str(iterations)+ str(point)+ "\n")
-
+        max_abs_value = np.max(np.abs(functions(point)))
+        if(max_abs_value < tol):
+            break
+        print(f"Iteration {iterations}\npoint = {point}\nmax_abs_value = {max_abs_value}\n")
+            
+    return point, iterations, max_abs_value
         
 
 
@@ -84,10 +78,8 @@ def newton_raphson(function, jacobian, initialPoint, tol=1e-8, max_iter=100):
 
 def main():
     ip = initial_point()
-    function = functions(ip)
-    jacobian = jacobians(ip)
-    n = newton_raphson(function, jacobian, ip)
-    print(n)
+    point, iterations, max_abs_value = newton_raphson(functions, jacobians, ip)
+    print(f"\nfinal point = {point}\niterations = {iterations}\n final max_abs_value = {max_abs_value}")
 
 
 if __name__ == "__main__":
