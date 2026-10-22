@@ -4,7 +4,7 @@ import math
 import pandas as pd
 
 
-global df = pd.read_csv('E449_Project2_oring_data.csv')
+df = pd.read_csv('E449_Project2_oring_data.csv')
 
 
 def functions(p,choice):
@@ -53,19 +53,40 @@ def jacobians(p,choice):
             [gx, gy, gz],
             [hx, hy, hz]
         ])
+        return J
     if choice == 2:
         
+        for i in range(23):
+            t = df['temp_f'][i]
+            Fa = -(p(1-p))
+            Fb = -(t * p * (1-p))
+            
+            Ga = -(t * p(1-p))
+            Gb = -((t ** 2)*p*(1-p))
+            
+        F = np.array([
+            [Fa, Fb]
+        ])
+        
+        G = np.array([
+            [Ga, Gb]
+        ])
+        return F, G
 
-    return J
+    
 
-def initial_point():
-    return np.array([0.1,0.1,-0.1])
+def initial_point(choice):
+    if choice == 3:
+        return np.array([0.1,0.1,-0.1])
+    elif choice == 2:
+        return np.array([0,0])
     
 
 def newton_raphson_2d(function, jacobian, initialpoint,tol,max_iter):
-    df = pd.read_csv('E449_Project2_oring_data.csv')
-    a = 0
-    b = 0
+    
+    i = initial_point(2)
+    a = i[0]
+    b = i[1]
     p = np.zeros(23)
     for i in range(23):
         t = df['temp_f'][i]
@@ -73,7 +94,7 @@ def newton_raphson_2d(function, jacobian, initialpoint,tol,max_iter):
 
 
 def newton_raphson(function, jacobian, initialPoint, tol=1e-8, max_iter=100):
-    I = initialPoint
+    I = initialPoint(3)
     xk = I[0]
     yk = I[1]
     zk = I[2]
