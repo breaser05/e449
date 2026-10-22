@@ -1,39 +1,60 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import math
-
-def functions(p):
-    xk, yk, zk = p
-    F = 3*xk - math.cos(yk*zk)-0.5
-    G = xk**2 -(81*(yk+0.1)**2)+math.sin(zk)+1.06
-    H = math.exp(-xk*yk)+ 20*zk + (10*math.pi -3)/(3)
-
-    F = np.array(
-            [F,G,H])
+import pandas as pd
 
 
-    return F
+global df = pd.read_csv('E449_Project2_oring_data.csv')
 
-def jacobians(p):
-    xk, yk, zk = p
 
-    gx = 2 * xk
-    gy = -162 * yk - 16.2
-    gz = math.cos(zk)
+def functions(p,choice):
+    if choice == 3:
+        xk, yk, zk = p
+        F = 3*xk - math.cos(yk*zk)-0.5
+        G = xk**2 -(81*(yk+0.1)**2)+math.sin(zk)+1.06
+        H = math.exp(-xk*yk)+ 20*zk + (10*math.pi -3)/(3)
 
-    fx = 3
-    fy = zk * math.sin(yk* zk)
-    fz = yk * math.sin(yk*zk)
+        F = np.array(
+                [F,G,H])
+        return F
+    elif choice == 2:
+        F = np.zeros(23)
+        G = np.zeros(23)
+        for i in range(23):
+            y = df['distress'][i]
+            t = df['temp_f'][i]
+            F = y-p
+            G = t*(y-p)
+            return F,G
+    else:
+        raise ValueError("Invalid choice. Must be 2 or 3.")
 
-    hx = -yk * math.exp(-xk*yk)
-    hy = -xk * math.exp(-xk*yk)
-    hz = 20
 
-    J = np.array([
-        [fx, fy, fz],
-        [gx, gy, gz],
-        [hx, hy, hz]
-    ])
+    
+
+def jacobians(p,choice):
+    if choice == 3:
+        xk, yk, zk = p
+
+        gx = 2 * xk
+        gy = -162 * yk - 16.2
+        gz = math.cos(zk)
+
+        fx = 3
+        fy = zk * math.sin(yk* zk)
+        fz = yk * math.sin(yk*zk)
+
+        hx = -yk * math.exp(-xk*yk)
+        hy = -xk * math.exp(-xk*yk)
+        hz = 20
+
+        J = np.array([
+            [fx, fy, fz],
+            [gx, gy, gz],
+            [hx, hy, hz]
+        ])
+    if choice == 2:
+        
 
     return J
 
@@ -41,6 +62,14 @@ def initial_point():
     return np.array([0.1,0.1,-0.1])
     
 
+def newton_raphson_2d(function, jacobian, initialpoint,tol,max_iter):
+    df = pd.read_csv('E449_Project2_oring_data.csv')
+    a = 0
+    b = 0
+    p = np.zeros(23)
+    for i in range(23):
+        t = df['temp_f'][i]
+        p[i] = 1/(1+np.exp(-(a+b*t)))
 
 
 def newton_raphson(function, jacobian, initialPoint, tol=1e-8, max_iter=100):
@@ -51,13 +80,13 @@ def newton_raphson(function, jacobian, initialPoint, tol=1e-8, max_iter=100):
     iterations = 0
     point = np.array([xk, yk, zk], dtype=float)
     iterations = 0
-    max_abs_value = np.max(np.abs(functions(point)))
+    max_abs_value = np.max(np.abs(functions(point,3)))
     while iterations < max_iter:
         
-        delta = np.linalg.solve(jacobian(point), -functions(point))
+        delta = np.linalg.solve(jacobian(point), -functions(point,3))
         point = point + delta
         iterations += 1
-        max_abs_value = np.max(np.abs(functions(point)))
+        max_abs_value = np.max(np.abs(functions(point,3)))
         if(max_abs_value < tol):
             break
         print(f"Iteration {iterations}\npoint = {point}\nmax_abs_value = {max_abs_value}\n")
