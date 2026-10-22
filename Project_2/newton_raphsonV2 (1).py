@@ -18,13 +18,13 @@ def functions(p,choice):
                 [F,G,H])
         return F
     elif choice == 2:
-        F = np.zeros(23)
-        G = np.zeros(23)
+        F = 0
+        G = 0
         for i in range(23):
             y = df['distress'][i]
             t = df['temp_f'][i]
-            F = y-p
-            G = t*(y-p)
+            F += y-p
+            G += t*(y-p)
             return F,G
     else:
         raise ValueError("Invalid choice. Must be 2 or 3.")
@@ -58,11 +58,12 @@ def jacobians(p,choice):
         
         for i in range(23):
             t = df['temp_f'][i]
-            Fa = -(p(1-p))
-            Fb = -(t * p * (1-p))
+            Fa,Fb,Ga,Gb = 0
+            Fa += -(p(1-p))
+            Fb += -(t * p * (1-p))
             
-            Ga = -(t * p(1-p))
-            Gb = -((t ** 2)*p*(1-p))
+            Ga += -(t * p(1-p))
+            Gb += -((t ** 2)*p*(1-p))
             
         F = np.array([
             [Fa, Fb]
