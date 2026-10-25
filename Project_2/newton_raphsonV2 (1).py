@@ -7,9 +7,9 @@ import pandas as pd
 df = pd.read_csv('E449_Project2_oring_data.csv')
 
 
-def functions(p,choice):
+def functions(r,choice):
     if choice == 3:
-        xk, yk, zk = p
+        xk, yk, zk = r
         F = 3*xk - math.cos(yk*zk)-0.5
         G = xk**2 -(81*(yk+0.1)**2)+math.sin(zk)+1.06
         H = math.exp(-xk*yk)+ 20*zk + (10*math.pi -3)/(3)
@@ -18,6 +18,12 @@ def functions(p,choice):
                 [F,G,H])
         return F
     elif choice == 2:
+        a = r[0]
+        b = r[1]
+        p = np.zeros(23)
+        for i in range(23):
+            t = df['temp_f'][i]                    
+            p[i] = 1/(1+np.exp(-(a+b*t)))
         F = 0
         G = 0
         for i in range(23):
@@ -32,9 +38,9 @@ def functions(p,choice):
 
     
 
-def jacobians(p,choice):
+def jacobians(r,choice):
     if choice == 3:
-        xk, yk, zk = p
+        xk, yk, zk = r
 
         gx = 2 * xk
         gy = -162 * yk - 16.2
@@ -55,25 +61,28 @@ def jacobians(p,choice):
         ])
         return J
     if choice == 2:
-        
+        a = r[0]
+        b = r[1]
+        p = np.zeros(23)
+        for i in range(23):
+            t = df['temp_f'][i]
+            p[i] = 1/(1+np.exp(-(a+b*t)))
+        Fa=Fb=Ga=Gb = 0
         for i in range(23):
             t = df['temp_f'][i]
 
-            Fa=Fb=Ga=Gb = 0
+            
             Fa += -(p[i]*(1-p[i]))
             Fb += -(t * p[i] * (1-p[i]))
             
             Ga += -(t * p[i]*(1-p[i]))
             Gb += -((t ** 2)*p[i]*(1-p[i]))
             
-        F = np.array([
-            [Fa, Fb]
-        ])
-        
-        G = np.array([
+        J = np.array([
+            [Fa, Fb],
             [Ga, Gb]
         ])
-        return F, G
+        return J
 
     
 
@@ -89,12 +98,8 @@ def newton_raphson_2d(function, jacobian, initialpoint,tol=1e-8,max_iter=100):
     i = initial_point(2)
     a = i[0]
     b = i[1]
-    p = np.zeros(23)
-    for i in range(23):
-        t = df['temp_f'][i]
-        p[i] = 1/(1+np.exp(-(a+b*t)))
     iterations = 0
-    point = p
+    point = [a,b]
     while iterations < max_iter:
             
             delta = np.linalg.solve(jacobian(point,2), -functions(point,2))
