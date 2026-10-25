@@ -92,7 +92,7 @@ def newton_raphson_2d(function, jacobian, initialpoint,tol=1e-8,max_iter=100):
     for i in range(23):
         t = df['temp_f'][i]
         p[i] = 1/(1+np.exp(-(a+b*t)))
-    
+    iterations = 0
     while iterations < max_iter:
             
             delta = np.linalg.solve(jacobian(point,2), -functions(point,2))
@@ -102,10 +102,11 @@ def newton_raphson_2d(function, jacobian, initialpoint,tol=1e-8,max_iter=100):
             if(max_abs_value < tol):
                 break
             print(f"Iteration {iterations}\npoint = {point}\nmax_abs_value = {max_abs_value}\n")
+    return point, iterations, max_abs_value
 
 
 def newton_raphson(function, jacobian, initialPoint, tol=1e-8, max_iter=100):
-    I = initialPoint(3)
+    I = initialPoint
     xk = I[0]
     yk = I[1]
     zk = I[2]
@@ -138,9 +139,12 @@ def newton_raphson(function, jacobian, initialPoint, tol=1e-8, max_iter=100):
 
 
 def main():
-    ip = initial_point()
+    ip = initial_point(3)
     point, iterations, max_abs_value = newton_raphson(functions, jacobians, ip)
     print(f"\nfinal point = {point}\niterations = {iterations}\n final max_abs_value = {max_abs_value}")
+
+    ip2 = initial_point(2)
+    point2, iterations2, max_abs_value2 = newton_raphson_2d(functions, jacobians, ip2)
 
 
 if __name__ == "__main__":
