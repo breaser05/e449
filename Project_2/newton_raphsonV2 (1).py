@@ -1,30 +1,37 @@
+# Henry Saam ,Laksh Solanki, Bryce Reaser
 import numpy as np
 import matplotlib.pyplot as plt
 import math
 import pandas as pd
 
 
-
+#This is where the code gets the datapoints from the CSV file.
+#this project uses Newton-Raphson to solve two systems of equations.
+#It prints the results and plots the logistic regression curve.
 df = pd.read_csv('E449_Project2_oring_data.csv')
 
 
 def functions(r):
     if len(r) == 3:
+# Gets the three unknown variables for Part I.
         xk, yk, zk = r
         F = 3*xk - math.cos(yk*zk)-0.5
         G = xk**2 -(81*(yk+0.1)**2)+math.sin(zk)+1.06
         H = math.exp(-xk*yk)+ 20*zk + (10*math.pi -3)/(3)
-
         F = np.array(
                 [F,G,H])
         return F
+# three nonlinear equations and return the three function values in an array
     elif len(r) == 2:
+# gets alpha and beta
         a = r[0]
         b = r[1]
+#calculate the probability
         p = np.zeros(23)
         for i in range(23):
             t = df['temp_f'][i]                    
             p[i] = 1/(1+np.exp(-(a+b*t)))
+#Sets F and G to zero and calulates them
         F = 0
         G = 0
         for i in range(23):
@@ -33,28 +40,30 @@ def functions(r):
             F += y-p[i]
             G += t*(y-p[i])
         return np.array([F,G])
+#returns F and G in an array
     else:
         raise ValueError("Invalid choice. Must be 2 or 3.")
 
 
-    
-
+#jacobian function
 def jacobians(r):
     if len(r) == 3:
         xk, yk, zk = r
+#gets the X, Y and Z values.
 
+#partial derivatives of G
         gx = 2 * xk
         gy = -162 * yk - 16.2
         gz = math.cos(zk)
-
+#partial derivatives of F
         fx = 3
         fy = zk * math.sin(yk* zk)
         fz = yk * math.sin(yk*zk)
-
+#partial derivatives of Z
         hx = -yk * math.exp(-xk*yk)
         hy = -xk * math.exp(-xk*yk)
         hz = 20
-
+#puts the partials in an array and then return the array
         J = np.array([
             [fx, fy, fz],
             [gx, gy, gz],
@@ -62,23 +71,27 @@ def jacobians(r):
         ])
         return J
     if len(r) == 2:
+#Gets A and B 
         a = r[0]
         b = r[1]
+#caluclates the probabilities
         p = np.zeros(23)
         for i in range(23):
             t = df['temp_f'][i]
             p[i] = 1/(1+np.exp(-(a+b*t)))
+#sets the derivative to zero
         Fa=Fb=Ga=Gb = 0
+#Calculate the four partial derivatives.
         for i in range(23):
             t = df['temp_f'][i]
 
-            
             Fa += -(p[i]*(1-p[i]))
             Fb += -(t * p[i] * (1-p[i]))
             
             Ga += -(t * p[i]*(1-p[i]))
             Gb += -((t ** 2)*p[i]*(1-p[i]))
-            
+# Put the derivatives into a matrix.
+
         J = np.array([
             [Fa, Fb],
             [Ga, Gb]
@@ -87,51 +100,53 @@ def jacobians(r):
 
     
 
-def initial_point(choice):
-    if choice == 3:
-        return np.array([0.1,0.1,-0.1])
-    elif choice == 2:
-        return np.array([0,0])
     
 
 def newton_raphson_2d(function, jacobian, initialpoint,tol=1e-8,max_iter=100):
-    
-    i = initial_point(2)
+#set a starting point
+    i = initialpoint
     a = i[0]
     b = i[1]
     iterations = 0
     point = [a,b]
+#Repeat until the answer is close enough or the limit is reached.
     while iterations < max_iter:
             
-            delta = np.linalg.solve(jacobian(point), -functions(point))
+#Calculate the next step.
+            delta = np.linalg.solve(jacobian(point), -function(point))
+#Update alpha and beta.
             point = point + delta
             iterations += 1
-            max_abs_value = np.max(np.abs(functions(point)))
+#Check how close the number to zero
+            max_abs_value = np.max(np.abs(function(point)))
             if(max_abs_value < tol):
                 break
-            print(f"Iteration {iterations}\npoint = {point}\nmax_abs_value = {max_abs_value}\n")
     return point, iterations, max_abs_value
 
 
 def newton_raphson(function, jacobian, initialPoint, tol=1e-8, max_iter=100):
+ #Set the starting point.
     I = initialPoint
     xk = I[0]
     yk = I[1]
     zk = I[2]
     iterations = 0
+    #Repeat until the answer is close enough or the limit is reached.
+
     point = np.array([xk, yk, zk], dtype=float)
     iterations = 0
-    max_abs_value = np.max(np.abs(functions(point)))
+    max_abs_value = np.max(np.abs(function(point)))
     while iterations < max_iter:
-        
-        delta = np.linalg.solve(jacobian(point), -functions(point))
+    # Calculate the next step.
+
+        delta = np.linalg.solve(jacobian(point), -function(point))
         point = point + delta
         iterations += 1
-        max_abs_value = np.max(np.abs(functions(point)))
+    # Check how close the answers are to zero.
+        max_abs_value = np.max(np.abs(function(point)))
         if(max_abs_value < tol):
             break
-        print(f"Iteration {iterations}\npoint = {point}\nmax_abs_value = {max_abs_value}\n")
-            
+    # Return the answer and iteration information.      
     return point, iterations, max_abs_value
         
 
@@ -147,13 +162,15 @@ def newton_raphson(function, jacobian, initialPoint, tol=1e-8, max_iter=100):
 
 
 def main():
-    ip = initial_point(3)
+    # Part 1: Solve the three equation
+    ip = np.array([0.1,0.1,-0.1])
     point, iterations, max_abs_value = newton_raphson(functions, jacobians, ip)
     print(f"\nfinal point = {point}\niterations = {iterations}\n final max_abs_value = {max_abs_value}")
-
-    ip2 = initial_point(2)
+    # Part 2: Solve the logistic regression equation
+    ip2 = np.array([0,0])
     point2, iterations2, max_abs_value2 = newton_raphson_2d(functions, jacobians, ip2)
-    
+    print("Part 2")
+    print(f"\nfinal point = {point2}\niterations  = {iterations2}\n final max_abs_value = {max_abs_value2}")
     a_opt, b_opt = point2[0], point2[1]
 
     # Generate temperature values for a smooth curve
