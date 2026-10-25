@@ -154,7 +154,31 @@ def main():
     ip2 = initial_point(2)
     point2, iterations2, max_abs_value2 = newton_raphson_2d(functions, jacobians, ip2)
     
+    a_opt, b_opt = point2[0], point2[1]
 
+    # Generate temperature values for a smooth curve
+    temp_range = np.linspace(df['temp_f'].min() - 5, df['temp_f'].max() + 5, 200)
+
+    # Calculate probability using logistic function: p = 1 / (1 + e^-(a + b*t))
+    prob_curve = 1 / (1 + np.exp(-(a_opt + b_opt * temp_range)))
+
+    # Create the plot
+    plt.figure(figsize=(10, 6))
+
+    # Plot the actual data points
+    plt.scatter(df['temp_f'], df['distress'], color='blue', alpha=0.7, label='Actual Data (Distress: 1, Normal: 0)', zorder=3)
+
+    # Plot the fitted logistic curve
+    plt.plot(temp_range, prob_curve, color='red', linewidth=2, label=f'Fitted Logistic Curve\n$p(T) = 1 / (1 + e^{{-({a_opt:.4f} {b_opt:+.4f} T)}})$')
+
+    # Add labels and formatting
+    plt.title('O-Ring Thermal Distress Probability vs. Temperature', fontsize=14)
+    plt.xlabel('Temperature (°F)', fontsize=12)
+    plt.ylabel('Probability of Distress', fontsize=12)
+    plt.axhline(0.5, color='gray', linestyle='--', alpha=0.5, label='Decision Boundary (p=0.5)')
+    plt.grid(True, linestyle=':', alpha=0.6)
+    plt.legend(loc='best', fontsize=10)
+    plt.show()
 
 
 
