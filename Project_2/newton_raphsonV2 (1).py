@@ -23,8 +23,8 @@ def functions(p,choice):
         for i in range(23):
             y = df['distress'][i]
             t = df['temp_f'][i]
-            F += y-p
-            G += t*(y-p)
+            F += y-p[i]
+            G += t*(y-p[i])
             return np.array([F,G])
     else:
         raise ValueError("Invalid choice. Must be 2 or 3.")
@@ -58,12 +58,13 @@ def jacobians(p,choice):
         
         for i in range(23):
             t = df['temp_f'][i]
-            Fa,Fb,Ga,Gb = 0
-            Fa += -(p(1-p))
-            Fb += -(t * p * (1-p))
+
+            Fa=Fb=Ga=Gb = 0
+            Fa += -(p[i]*(1-p[i]))
+            Fb += -(t * p[i] * (1-p[i]))
             
-            Ga += -(t * p(1-p))
-            Gb += -((t ** 2)*p*(1-p))
+            Ga += -(t * p[i]*(1-p[i]))
+            Gb += -((t ** 2)*p[i]*(1-p[i]))
             
         F = np.array([
             [Fa, Fb]
@@ -93,6 +94,7 @@ def newton_raphson_2d(function, jacobian, initialpoint,tol=1e-8,max_iter=100):
         t = df['temp_f'][i]
         p[i] = 1/(1+np.exp(-(a+b*t)))
     iterations = 0
+    point = p
     while iterations < max_iter:
             
             delta = np.linalg.solve(jacobian(point,2), -functions(point,2))
