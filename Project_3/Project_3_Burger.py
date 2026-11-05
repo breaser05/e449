@@ -22,6 +22,7 @@ N=16 #N
 ⠀⠀⠀⢿⣷⢻⣿⣆⢠⡀⠀⡀⠀⠀⠀⠀⠀⠙⠳⠶⠞⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣸⡇⠀⠀
 ⠀⠀⠀⠘⢿⣦⣍⡛⠦⣷⣀⠳⣀⠈⠳⣄⠀⠀⣀⢀⣀⣀⣀⣀⣀⣀⣀⠀⠀⢀⣀⣀⣀⣀⡠⠤⠀⠀⠀⠀⠀⠀⠀⢀⣠⣴⠟⠀⠀⠀
 ⠀⠀⠀⠀⠀⠉⠙⠛⠻⠷⣶⣶⣾⣽⣷⣦⣤⣀⣈⣉⣉⣁⣀⣀⣀⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣶⡶⠶⠶⠶⠒⠚⠋⠉⠁⠀⠀⠀⠀⠀"""
+
 def convolutions(h_hat, r_hat):
     h = (2*N)*np.fft.irfft(h_hat,n=2*N)
     r = (2*N)*np.fft.irfft(r_hat,n=2*N)
@@ -32,11 +33,15 @@ def convolutions(h_hat, r_hat):
     return s_hat
 
 
-def runge_kutta(F):
+def runge_kutta(F,t):
     h = 0.001
 
     while True:
-        F = F + h/6*()
+        k1 = f(t,F)
+        k2 = f(t + h/2,F+k1*h/2)
+        k3 = f(t + h/2,F+k2*h/2)
+        k4 = f(t+h,F+h*k3)
+        F = F + h/6*(k1 +2*k2+2*k3+k4)
     #yn+1 = yn +h/6(k1+2*k2+2*k3+k4)
     #tn+1 = tn + h
     #k1 = f(tn,yn)
@@ -44,4 +49,4 @@ def runge_kutta(F):
     #k3 = tn + h/2,yn + k1*h/2)
     #k4 = f(tn +h,yn +h*k3)
     
-    pass
+    
