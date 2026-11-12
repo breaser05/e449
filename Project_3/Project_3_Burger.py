@@ -1,3 +1,4 @@
+#Henry Saam, Laksh Solanki, Bryce Reaser
 import numpy as np
 import math 
 N=16 #N
@@ -35,7 +36,6 @@ def convolutions(h_hat, r_hat):
 
 
 def rhs(A,t):
-    h = 0.001
     Dx = np.zeros(17)
     
     for i in range(17):
@@ -57,7 +57,9 @@ def rhs(A,t):
  
     return Nonlinear + Laplacian + Forcing
     
-
+def main:
+    #A is the coeffecients psotivve and negaitive call rhs and then print that out done!
+    pass
     
     
 
