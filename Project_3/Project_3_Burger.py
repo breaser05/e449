@@ -1,4 +1,5 @@
 import numpy as np
+import math 
 N=16 #N
 
 """⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣠⡤⠶⠶⠚⠛⠛⠻⠿⢷⣶⡶⢾⣿⢿⣿⣷⣶⣶⣤⣤⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -33,15 +34,35 @@ def convolutions(h_hat, r_hat):
     return s_hat
 
 
-def runge_kutta(F,t):
+def rhs(A,t):
     h = 0.001
+    Dx = np.zeros(17)
+    
+    for i in range(17):
+        if i ==  0 or i == 16:
+            continue
+        Dx[i] = A*i*1j 
+    Nonlinear = -convolutions(A,Dx)
+    Laplacian = np.zeros(17)
+    
+    for i in range(17):
+        if i ==  0 or i == 16:
+                continue
+        Laplacian[i] = -(i^2)
+    Forcing = np.zeros(17)
+    Forcing[1] = -((math.e^-t)/4)
+    Forcing[2] = 2- (1j*math.pow(math.e,2*t))
+    
 
-    while True:
-        k1 = f(t,F)
-        k2 = f(t + h/2,F+k1*h/2)
-        k3 = f(t + h/2,F+k2*h/2)
-        k4 = f(t+h,F+h*k3)
-        F = F + h/6*(k1 +2*k2+2*k3+k4)
+    
+    
+
+
+    #k1 = f(t,A)
+    #k2 = f(t + h/2,A+k1*h/2)
+    #k3 = f(t + h/2,A+k2*h/2)
+    #k4 = f(t+h,A+h*k3)
+    #A = A + h/6*(k1 +2*k2+2*k3+k4)
     #yn+1 = yn +h/6(k1+2*k2+2*k3+k4)
     #tn+1 = tn + h
     #k1 = f(tn,yn)
