@@ -51,7 +51,11 @@ def rhs(A,t):
         Laplacian[i] = -(i^2)
     Forcing = np.zeros(17)
     Forcing[1] = -((math.e^-t)/4)
-    Forcing[2] = 2- (1j*math.pow(math.e,2*t))
+    Forcing[2] = 2- ((1j*math.pow(math.e,2*t))/4)
+    Forcing[3] = -(3*math.e^-t/4)
+    Forcing[4] = 1j/2
+ 
+    return Nonlinear + Laplacian + Forcing
     
 
     
